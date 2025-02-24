@@ -25,7 +25,7 @@ func UpinsEventuserByEventranking(client *http.Client, tnow time.Time, eventid s
 	user := srdblib.User{
 		Userno: roomdata.RoomID,
 	}
-	srdblib.UpinsUserSetProperty(client, tnow, &user, 1440, 5000)
+	srdblib.UpinsUserSetProperty(client, tnow, &user, 14400, 5000)
 
 	// イベントユーザー情報を取得する
 	var intf interface{}
@@ -86,7 +86,7 @@ func UpinsWeventuserByEventranking(client *http.Client, tnow time.Time, eventid 
 	wuser := TWuser{
 		Userno: roomdata.RoomID,
 	}
-	UpinsTWuserSetProperty(client, tnow, &wuser, 1440, 5000)
+	UpinsTWuserSetProperty(client, tnow, &wuser, 14400, 5000)
 
 	// イベントユーザー情報を取得する
 	var intf interface{}
