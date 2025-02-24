@@ -95,7 +95,7 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		//	ルーム名、ID、URLを取得しますが、イベント終了直後の場合の最終獲得ポイントが表示されている場合はそれも取得します。
 		breg := 1
 		//	確定値（最終獲得ポイント）が発表されるのは30位まで。確定値が発表されないイベントもあるので要注意。
-		ereg := 1
+		ereg := 100
 		var Roomlistinf *srapi.RoomListInf
 		Roomlistinf, err = srapi.GetRoominfFromEventByApi(http.DefaultClient, ieventid, breg, ereg)
 		if err != nil {
@@ -107,6 +107,11 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		// 	log.Printf("     ****** %s is level ivent!\n", eventid)
 		// 	return
 		// }
+
+		if len(Roomlistinf.RoomList) == 0 {
+			log.Printf("	 ****** %s is no room!\n", eventid)
+			return
+		}
 
 		pranking, err = srapi.ApiEventsRanking(http.DefaultClient, ieventid, Roomlistinf.RoomList[0].Room_id, 0)
 		if err != nil {

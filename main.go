@@ -14,15 +14,19 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/Chouette2100/exsrapi"
+	"github.com/Chouette2100/srapi"
 	"github.com/Chouette2100/srdblib"
 )
 
 /*
 00AA00 最初のバージョン
 00AA01 ユーザーテーブルの更新条件を1日以上から10日以上に変更する。
+00AA02 参加者がいないイベントは処理の対象としない。
+00AA03 バージョンにsrdblibとsrapiのバージョンを含める。
+       UpinsTWuserSetProperty()で更新が最近でUpdateが不要な場合は更新しないようにする。
 */
 
-const version = "00AA01"
+const version = "00AA03"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
@@ -31,7 +35,7 @@ const version = "00AA01"
 func main() {
 
 	// ログファイルを開く
-	logfilename := version + "_" + time.Now().Format("20060102") + ".txt"
+	logfilename := version + "_" + srdblib.Version + "_" + srapi.Version + "_" + time.Now().Format("20060102") + ".txt"
 	logfile, err := os.OpenFile(logfilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		fmt.Println("ログファイルを開けません:", err)
