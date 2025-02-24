@@ -36,21 +36,23 @@ func UpinsEventuserByEventranking(client *http.Client, tnow time.Time, eventid s
 	} else if intf == nil {
 		// なければ新規作成
 		eventuser := &srdblib.Eventuser{
-			Eventid:       eventid,
-			Userno:        roomdata.RoomID,
-			Vld:           roomdata.Rank,
-			Point:         roomdata.Point,
-			Istarget:      "Y",
-			Iscntrbpoints: "N",
-			Graph: func(v int) (yes string) {
-				if v < 21 {
-					return "Y"
-				} else {
-					return "N"
-				}
-			}(roomdata.Rank),
-			Color: srdblib.Colorlist2[(roomdata.Rank-1)%len(srdblib.Colorlist2)].Name,
-			// Status: 0,
+			EventuserBR: srdblib.EventuserBR{
+				Eventid:       eventid,
+				Userno:        roomdata.RoomID,
+				Vld:           roomdata.Rank,
+				Point:         roomdata.Point,
+				Istarget:      "Y",
+				Iscntrbpoints: "N",
+				Graph: func(v int) (yes string) {
+					if v < 21 {
+						return "Y"
+					} else {
+						return "N"
+					}
+				}(roomdata.Rank),
+				Color: srdblib.Colorlist2[(roomdata.Rank-1)%len(srdblib.Colorlist2)].Name,
+			},
+			Status: 0,
 		}
 		err = srdblib.Dbmap.Insert(eventuser)
 		if err != nil {
@@ -97,6 +99,7 @@ func UpinsWeventuserByEventranking(client *http.Client, tnow time.Time, eventid 
 	} else if intf == nil {
 		// なければ新規作成
 		weventuser := &srdblib.Weventuser{
+			EventuserBR: srdblib.EventuserBR{
 			Eventid:       eventid,
 			Userno:        roomdata.RoomID,
 			Vld:           roomdata.Rank,
@@ -111,7 +114,8 @@ func UpinsWeventuserByEventranking(client *http.Client, tnow time.Time, eventid 
 				}
 			}(roomdata.Rank),
 			Color: srdblib.Colorlist2[(roomdata.Rank-1)%len(srdblib.Colorlist2)].Name,
-			// Status: 0,
+			},
+			Status: 0,
 		}
 		err = srdblib.Dbmap.Insert(weventuser)
 		if err != nil {
