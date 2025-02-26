@@ -78,7 +78,7 @@ func UpinsTWuserSetProperty(client *http.Client, tnow time.Time, wuser *TWuser, 
 	var vdata *srdblib.User
 	var estatus int
 
-	twuser := new(srdblib.TWuser)
+	twuser := new(srdblib.Wuser)
 	copier.Copy(twuser, wuser)
 	tuser := new(srdblib.User)
 	copier.Copy(tuser, wuser)

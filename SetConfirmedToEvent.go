@@ -23,10 +23,12 @@ func SetConfirmedToEvent(client *http.Client, done chan struct{}) (
 	ll := tt.Add(-48 * time.Hour)
 	ul := tt.Add(-24 * time.Hour)
 
+	/* テスト用 */
 	if time.Since(tt) > 12*time.Hour {
 		ll = ll.Add(24 * time.Hour)
 		ul = ul.Add(24 * time.Hour)
 	}
+	/* --- */
 
 	condition := &EventCondition{
 		LowerLimitOfEndtime: ll,
