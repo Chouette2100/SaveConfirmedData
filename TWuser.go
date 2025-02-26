@@ -21,6 +21,7 @@ import (
 	//      "gopkg.in/gorp.v2"
 
 	"github.com/dustin/go-humanize"
+	"github.com/jinzhu/copier"
 
 	//	"github.com/Chouette2100/exsrapi"
 	"github.com/Chouette2100/srapi"
@@ -73,31 +74,43 @@ func UpinsTWuserSetProperty(client *http.Client, tnow time.Time, wuser *TWuser, 
 	err error,
 ) {
 
-	row, err := srdblib.Dbmap.Get(TWuser{}, wuser.Userno)
+	// row, err := srdblib.Dbmap.Get(TWuser{}, wuser.Userno)
+	var vdata *srdblib.User
+	var estatus int
+
+	twuser := new(srdblib.TWuser)
+	copier.Copy(twuser, wuser)
+	tuser := new(srdblib.User)
+	copier.Copy(tuser, wuser)
+
+	estatus, vdata, err = srdblib.GetLastUserdata(twuser, lmin)
 	if err != nil {
-		err = fmt.Errorf("Get(userno=%d) returned error. %w", wuser.Userno, err)
+		err = fmt.Errorf("GetNewUserdata(userno=%d) returned error. %w", wuser.Userno, err)
 		return err
-	} else {
-		if row == nil {
-			err = InsertIntoTWuser(client, tnow, wuser.Userno)
-			if err != nil {
-				err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", wuser.Userno, err)
-			}
-			time.Sleep(time.Duration(wait) * time.Millisecond)
-		} else {
-			wusert := row.(*TWuser)
-			//	lastrank := usert.Rank
-			if wusert.Ts.After(tnow.Add(time.Duration(-lmin) * time.Minute)) {
-				log.Printf("skipped. UpinsUserSetProperty(userno=%d rank=%s %s)  %v", wuser.Userno, wusert.Rank, wusert.User_name, wusert.Ts)
-				return nil
-			}
-			err = UpdateTWuserSetProperty(client, tnow, wusert)
-			if err != nil {
-				err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", wuser.Userno, err)
-			}
-			time.Sleep(time.Duration(wait) * time.Millisecond)
-			//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
+	}
+	switch estatus {
+	case 0:
+		err = InsertIntoTWuser(client, tnow, wuser.Userno)
+		if err != nil {
+			err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", wuser.Userno, err)
+			return
 		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
+	case 1:
+		err = UpdateTWuserSetProperty(client, tnow, wuser)
+		if err != nil {
+			err = fmt.Errorf("Dbmap.Insert(userno=%d) returned error. %w", wuser.Userno, err)
+			return
+		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
+	case 2:	// 最新のデータがuserテーブルにある場合
+		copier.Copy(wuser, vdata)
+		_, err = srdblib.Dbmap.Update(wuser)
+		if err != nil {
+			err = fmt.Errorf("Dbmap.Update(userno=%d) returned error. %w", wuser.Userno, err)
+			return
+		}
+	default:
 	}
 
 	return
