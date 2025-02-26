@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	// "io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -35,9 +35,11 @@ import (
 00AB00 SIGNALでの実行中断に対応する。
 00AB01 二重起動を禁止する。
 00AB02 全部の処理が終了したらmain()も終了するようにする。
+00AB03 AddTableWithName(srdblib.TWuser{}, "wuser")をAddTableWithName(TWuser{}, "wuser")に変更する。
+00AC00 ユーザテーブルの更新用関数の変更にともなる修正を行う。
 */
 
-const version = "00AB02"
+const version = "00AC00"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
@@ -116,8 +118,8 @@ func main() {
 	}
 	srdblib.Dbmap.AddTableWithName(srdblib.User{}, "user").SetKeys(false, "Userno")
 	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "userhistory").SetKeys(false, "Userno", "Ts")
-	// srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
 	srdblib.Dbmap.AddTableWithName(srdblib.TWuser{}, "wuser").SetKeys(false, "Userno")
+	srdblib.Dbmap.AddTableWithName(TWuser{}, "wuser").SetKeys(false, "Userno")
 	srdblib.Dbmap.AddTableWithName(srdblib.Wuserhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
 	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "event").SetKeys(false, "Eventid")
 	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "eventuser").SetKeys(false, "Eventid", "Userno")
@@ -177,7 +179,8 @@ func main() {
 
 // 既存のロックファイルをチェックし、有効なプロセスが実行中かを確認
 func checkExistingLock(lockFilePath string) bool {
-	content, err := ioutil.ReadFile(lockFilePath)
+	// content, err := ioutil.ReadFile(lockFilePath)
+	content, err := os.ReadFile(lockFilePath)
 	if err != nil {
 		// ファイルが存在しない場合はロックなし
 		return false

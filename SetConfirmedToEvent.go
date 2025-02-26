@@ -26,7 +26,6 @@ func SetConfirmedToEvent(client *http.Client, done chan struct{}) (
 	if time.Since(tt) > 12*time.Hour {
 		ll = ll.Add(24 * time.Hour)
 		ul = ul.Add(24 * time.Hour)
-
 	}
 
 	condition := &EventCondition{
@@ -42,12 +41,11 @@ func SetConfirmedToEvent(client *http.Client, done chan struct{}) (
 	for i, v := range intf {
 		select {
 		case <-done:
+			// 強制終了させられた場合
 			fmt.Printf("Interrupted at iteration %d\n", i)
 			return
 		default:
-			// 重い処理のシミュレーション
 			fmt.Printf("Processing iteration %d\n", i)
-			time.Sleep(10 * time.Second)
 
 			event := v.(*srdblib.Event)
 			log.Printf("  *****************************************************\n  event: %d(%s) [%s] %s\n",

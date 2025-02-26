@@ -53,11 +53,10 @@ type Roomdata struct {
 func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block bool, blockid int) (err error) {
 
 	fncname := exsrapi.FuncNameOfThisFunction(1) + "()"
-
-	//	fncname := "GetConfirmed()"
 	cmt0 := event.Eventid
 	log.Println(cmt0, ">>>>>>>>>>>>>>>>>>", fncname, ">>>>>>>>>>>>>>>>>>>")
 	defer exsrapi.PrintExf(cmt0, fncname)()
+
 	//	svtime := gschedule.Endtime.Add(1 * time.Second)
 	svtime := event.Endtime.Add(time.Duration(ConfirmedAt) * time.Second)
 	// svtime := event.Endtime // wevent.Endtime は格納時に +59秒されている模様
