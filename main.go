@@ -38,9 +38,11 @@ import (
 00AB03 AddTableWithName(srdblib.TWuser{}, "wuser")をAddTableWithName(TWuser{}, "wuser")に変更する。
 00AC00 ユーザテーブルの更新用関数の変更にともなる修正を行う。
 00AC01 srdblibを最新バージョンに対応する。
+00AD00 EventuserとUserの更新をGenerics版に変更する。
+00AD01 EventuserとUserの更新をGenerics版に変更する（リリース版）
 */
 
-const version = "00AC01"
+const version = "00AD01"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
@@ -120,7 +122,7 @@ func main() {
 	srdblib.Dbmap.AddTableWithName(srdblib.User{}, "user").SetKeys(false, "Userno")
 	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "userhistory").SetKeys(false, "Userno", "Ts")
 	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
-	srdblib.Dbmap.AddTableWithName(TWuser{}, "wuser").SetKeys(false, "Userno")
+	// srdblib.Dbmap.AddTableWithName(TWuser{}, "wuser").SetKeys(false, "Userno")
 	srdblib.Dbmap.AddTableWithName(srdblib.Wuserhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
 	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "event").SetKeys(false, "Eventid")
 	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "eventuser").SetKeys(false, "Eventid", "Userno")
@@ -137,6 +139,14 @@ func main() {
 		srdblib.Dbmap.AddTableWithName(srdblib.GiftRanking{}, "giftranking").SetKeys(false, "Campaignid", "Grid")
 		srdblib.Dbmap.AddTableWithName(srdblib.Accesslog{}, "accesslog").SetKeys(false, "Ts", "Eventid")
 	*/
+
+	fileenv := "Env.yml"
+	err = exsrapi.LoadConfig(fileenv, &srdblib.Env)
+	if err != nil {
+		err = fmt.Errorf("exsrapi.Loadconfig(): %w", err)
+		log.Printf("%s\n", err.Error())
+		return
+	}
 
 	client, cookiejar, err := exsrapi.CreateNewClient("")
 	if err != nil {

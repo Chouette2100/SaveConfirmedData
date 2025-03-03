@@ -136,8 +136,11 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		InsertIntoOrUpdatePoints(svtime, roomdata, roomdata.Rank, 0, eventid, "Conf.", "", "", "")
 		isconfirm = true
 
-		UpinsEventuserByEventranking(client, tnow, eventid, roomdata)
-		UpinsWeventuserByEventranking(client, tnow, eventid, roomdata)
+		eu := srdblib.Eventuser{}
+		UpinsUserAndEventuser(client, tnow, &eu, eventid, roomdata)
+		weu := srdblib.Weventuser{}
+		UpinsUserAndEventuser(client, tnow, &weu, eventid, roomdata)
+
 	}
 
 	log.Printf("%s isconfirm =%t, isquest=%t\n", eventid, isconfirm, isquest)
@@ -179,6 +182,46 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		// 	srdblib.MakePointPerSlot(event.Event_name, eventid)
 		// }
 	}
+
+	return
+
+}
+
+func UpinsUserAndEventuser[T srdblib.EventuserR](
+	client *http.Client,
+	tnow time.Time,
+	xeu T,
+	eventid string,
+	roomdata Roomdata,
+) (
+	err error,
+) {
+	switch any(xeu).(type) {
+	case *srdblib.Eventuser:
+		xuser := srdblib.User{
+			Userno: roomdata.RoomID,
+		}
+		srdblib.UpinsUser(client, tnow, &xuser)
+	case *srdblib.Weventuser:
+		xuser := srdblib.Wuser{
+			Userno: roomdata.RoomID,
+		}
+		srdblib.UpinsUser(client, tnow, &xuser)
+	default:
+		err = fmt.Errorf("UpinstUserAndEventuser() invalid type of xeu")
+		return
+	}
+
+	eu := srdblib.Eventuser{
+		EventuserBR: srdblib.EventuserBR{
+			Eventid:  eventid,
+			Userno:  roomdata.RoomID, // roomdata.Userno,
+			Vld:     roomdata.Rank,
+			Point:   roomdata.Point,
+		},
+	}
+	xeu.Set(&eu)
+	srdblib.UpinsEventuserG(xeu, tnow)
 
 	return
 

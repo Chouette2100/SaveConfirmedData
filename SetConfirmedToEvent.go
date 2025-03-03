@@ -19,11 +19,16 @@ func SetConfirmedToEvent(client *http.Client, done chan struct{}) (
 	err error,
 ) {
 
+	/* テスト用
+	tt := time.Now().Add(9 * time.Hour).Truncate(24 * time.Hour).Add(-9 * time.Hour)
+	ll := tt.Add(-72 * time.Hour)
+	ul := tt.Add(-48 * time.Hour)
+	--- */
+	/* 本番用 */
 	tt := time.Now().Add(9 * time.Hour).Truncate(24 * time.Hour).Add(-9 * time.Hour)
 	ll := tt.Add(-48 * time.Hour)
 	ul := tt.Add(-24 * time.Hour)
 
-	/* テスト用 */
 	if time.Since(tt) > 12*time.Hour {
 		ll = ll.Add(24 * time.Hour)
 		ul = ul.Add(24 * time.Hour)
