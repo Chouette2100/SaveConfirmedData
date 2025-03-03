@@ -37,7 +37,7 @@ import (
 
 	"github.com/Chouette2100/exsrapi"
 	"github.com/Chouette2100/srapi"
-	"github.com/Chouette2100/srdblib"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 const ConfirmedAt = 59
@@ -137,9 +137,17 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		isconfirm = true
 
 		eu := srdblib.Eventuser{}
-		UpinsUserAndEventuser(client, tnow, &eu, eventid, roomdata)
+		err = UpinsUserAndEventuser(client, tnow, &eu, eventid, roomdata)
+		if err != nil {
+			err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
+			return
+		}
 		weu := srdblib.Weventuser{}
-		UpinsUserAndEventuser(client, tnow, &weu, eventid, roomdata)
+		err = UpinsUserAndEventuser(client, tnow, &weu, eventid, roomdata)
+		if err != nil {
+			err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
+			return
+		}
 
 	}
 
@@ -221,7 +229,11 @@ func UpinsUserAndEventuser[T srdblib.EventuserR](
 		},
 	}
 	xeu.Set(&eu)
-	srdblib.UpinsEventuserG(xeu, tnow)
+	err = srdblib.UpinsEventuserG(xeu, tnow)
+	if err != nil {
+		err = fmt.Errorf("UpinsEventuserG() err=[%w]", err)
+		return
+	}
 
 	return
 

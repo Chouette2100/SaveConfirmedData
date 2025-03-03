@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Chouette2100/srdblib"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 type EventCondition struct {

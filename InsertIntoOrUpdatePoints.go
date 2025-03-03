@@ -36,7 +36,7 @@ import (
 
 	// "github.com/Chouette2100/exsrapi"
 	// "github.com/Chouette2100/srapi"
-	"github.com/Chouette2100/srdblib"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 // 獲得ポイントデータをDBに格納する、既存のデータは更新する。

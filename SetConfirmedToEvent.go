@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Chouette2100/srdblib"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 // イベントが終了直後（終了日翌日12時〜翌々日12時）にイベントの確定結果を取得して、ポイントテーブル、イベントテーブルに格納する。

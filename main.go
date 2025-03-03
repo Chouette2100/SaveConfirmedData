@@ -22,7 +22,7 @@ import (
 
 	"github.com/Chouette2100/exsrapi"
 	"github.com/Chouette2100/srapi"
-	"github.com/Chouette2100/srdblib"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 /*
@@ -40,9 +40,10 @@ import (
 00AC01 srdblibを最新バージョンに対応する。
 00AD00 EventuserとUserの更新をGenerics版に変更する。
 00AD01 EventuserとUserの更新をGenerics版に変更する（リリース版）
+00AD02 関数リターン値のerrの処理を追加する。
 */
 
-const version = "00AD01"
+const version = "00AD02"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
