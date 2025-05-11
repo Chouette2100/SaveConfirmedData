@@ -41,9 +41,10 @@ import (
 00AD00 EventuserとUserの更新をGenerics版に変更する。
 00AD01 EventuserとUserの更新をGenerics版に変更する（リリース版）
 00AD02 関数リターン値のerrの処理を追加する。
+00AE00 srdblib V2.2.0 を採用する。
 */
 
-const version = "00AD02"
+const version = "00AE00"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
