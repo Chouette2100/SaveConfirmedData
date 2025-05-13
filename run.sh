@@ -4,4 +4,5 @@
 #SSHuser: username
 #SSHpswd:
 #SSHprvkey: /home/username/.ssh/nameofkey
-env DBNAME=xxxxxx DBUSER=xxxxxx DBPW=xxxxxx ./SaveConfirmedData
+cd /home/chouette/go/src/SaveConfirmedData
+env DBNAME=xxxxxx DBUSER=xxxxxx DBPW=xxxxxx ./SaveConfirmedData Both
