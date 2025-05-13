@@ -42,15 +42,38 @@ import (
 00AD01 EventuserとUserの更新をGenerics版に変更する（リリース版）
 00AD02 関数リターン値のerrの処理を追加する。
 00AE00 srdblib V2.2.0 を採用する。
+00AF00 起動時オプションOnlyUinfを追加する、していされたときはユーザー情報の更新のみを行う。
+00AF01 起動時オプションをUinf, Sdat, Bothとする。
 */
 
-const version = "00AE00"
+const version = "00AF01"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
 // 複数回実行した場合は、最初の実行で取得したデータを上書きしない。
 // 再実行でデータを上書きしたいときは event.rstatus を "Confirmed" 以外（例えば'Provisional'）に変更する。
 func main() {
+
+	// 起動時パラメータが1個以外場合はエラー
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: ", os.Args[0], " Uinf|Sdat|Both")
+		os.Exit(1)
+	}
+	// 引数の処理
+	uinf := false
+	sdat := false
+	switch os.Args[1] {
+	case "Uinf":
+		uinf = true
+	case "Sdat":
+		sdat = true
+	case "Both":
+		uinf = true
+		sdat = true
+	default:
+		fmt.Println("Usage: ", os.Args[0], " Uinf|Sdat|Both")
+		os.Exit(1)
+	}
 
 	// ロックファイルのパス
 	lockFilePath := "/tmp/SaveConfirmedData.lock"
@@ -150,6 +173,8 @@ func main() {
 		return
 	}
 
+	log.Printf("sdat=%t ufinf=%t Env=%+v\n", sdat, uinf, srdblib.Env)
+
 	client, cookiejar, err := exsrapi.CreateNewClient("")
 	if err != nil {
 		err = fmt.Errorf("exsrapi.CeateNewClient(): %s", err.Error())
@@ -174,7 +199,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		SetConfirmedToEvent(client, done)
+		SetConfirmedToEvent(client, sdat, uinf, done)
 	}()
 
 	// シグナル受信とプロセス完了の両方を待つ

@@ -50,7 +50,7 @@ type Roomdata struct {
 }
 
 // 獲得ポイントの最終結果を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
-func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block bool, blockid int) (err error) {
+func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block bool, blockid int, sdat bool, uinf bool) (err error) {
 
 	fncname := exsrapi.FuncNameOfThisFunction(1) + "()"
 	cmt0 := event.Eventid
@@ -133,26 +133,33 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		log.Printf(" i+1=%d, userno=%d, point=%d(%s)\n", i+1, roomdata.RoomID, roomdata.Point, svtime.Format("2006-01-02 15:04:05"))
 		//	InsertIntoOrUpdatePoints(svtime, roominf.Userno, roominf.Point, i+1, 0, eventid, "Conf.", "", "", "")
 		// InsertIntoOrUpdatePoints(svtime, roominf, i+1, 0, eventid, "Conf.", "", "", "")
-		InsertIntoOrUpdatePoints(svtime, roomdata, roomdata.Rank, 0, eventid, "Conf.", "", "", "")
-		isconfirm = true
-
-		eu := srdblib.Eventuser{}
-		err = UpinsUserAndEventuser(client, tnow, &eu, eventid, roomdata)
-		if err != nil {
-			err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
-			return
+		if sdat {
+			InsertIntoOrUpdatePoints(svtime, roomdata, roomdata.Rank, 0, eventid, "Conf.", "", "", "")
+			isconfirm = true
 		}
-		weu := srdblib.Weventuser{}
-		err = UpinsUserAndEventuser(client, tnow, &weu, eventid, roomdata)
-		if err != nil {
-			err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
-			return
+
+		if uinf {
+			// 獲得ポイントが確定する前に OnlyUinf で起動したときにユーザ情報を取得する
+			// 確定結果を取得するときはユーザー情報は更新済みのはず
+			eu := srdblib.Eventuser{}
+			err = UpinsUserAndEventuser(client, tnow, &eu, eventid, roomdata)
+			if err != nil {
+				err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
+				return
+			}
+			weu := srdblib.Weventuser{}
+			err = UpinsUserAndEventuser(client, tnow, &weu, eventid, roomdata)
+			if err != nil {
+				err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
+				return
+			}
 		}
 
 	}
 
-	log.Printf("%s isconfirm =%t, isquest=%t\n", eventid, isconfirm, isquest)
-	if isconfirm || isquest {
+	log.Printf("%s isconfirm =%t, isquest=%t sdat=%t uinf=%t\n", eventid, isconfirm, isquest, sdat, uinf)
+	if (isconfirm || isquest) && sdat {
+		// 確定データの取得が成功した場合、イベントテーブルのrstatusを"Confirmed"に更新します。
 		/*
 			sqlstmt := "update event set rstatus = ? where eventid = ?"
 			_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, "Confirmed", eventid)
@@ -222,7 +229,7 @@ func UpinsUserAndEventuser[T srdblib.EventuserR](
 
 	eu := srdblib.Eventuser{
 		EventuserBR: srdblib.EventuserBR{
-			Eventid:  eventid,
+			Eventid: eventid,
 			Userno:  roomdata.RoomID, // roomdata.Userno,
 			Vld:     roomdata.Rank,
 			Point:   roomdata.Point,

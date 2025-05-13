@@ -18,6 +18,8 @@ import (
 type EventCondition struct {
 	LowerLimitOfEndtime time.Time
 	UpperLimitOfEndtime time.Time
+	Sdat                bool
+	Uinf                bool
 }
 
 // イベントの開始日時の範囲
@@ -39,7 +41,13 @@ func ExtractEvents(
 		sqlst += " AND endtime <= ? "
 	}
 	// var intf interface{}
+	// uloe := condition.UpperLimitOfEndtime
+	// if condition.OnlyUinf {
+	// 	// ユーザ情報の更新のみを行う場合は、プログラム実行時時点で終了したイベントを対象とする
+	// 	uloe = time.Now()
+	// }
 	intf, err = srdblib.Dbmap.Select(&srdblib.Event{}, sqlst, condition.LowerLimitOfEndtime, condition.UpperLimitOfEndtime)
+	// intf, err = srdblib.Dbmap.Select(&srdblib.Event{}, sqlst, condition.LowerLimitOfEndtime, uloe)
 	if err != nil {
 		err = fmt.Errorf("srdblib.Dbmap.Select failed: %w", err)
 		return
