@@ -1,8 +1,24 @@
 #! /bin/bash
-#SSHhost: nnn.nnn.nnn.nnn
-#SSHport: nnnn
-#SSHuser: username
-#SSHpswd:
-#SSHprvkey: /home/username/.ssh/nameofkey
+
 cd /home/chouette/go/src/SaveConfirmedData
-env DBNAME=xxxxxx DBUSER=xxxxxx DBPW=xxxxxx ./SaveConfirmedData Both
+# cd /home/chouette/MyProject/Showroom/SaveConfirmedData
+
+source ./my_script.env
+
+# -------------------------------------
+# $ cat ./my_script.env
+# export DBNAME=......
+# export DBUSER=......
+# export DBPSWD=......
+
+# export DBPORT=......
+
+# export SSHHOST=......
+# export SSHPORT=......
+# export SSHUSER=......
+
+# # export SSHPSWD=......
+# export SSHKEY=......
+# -------------------------------------
+
+./SaveConfirmedData Both

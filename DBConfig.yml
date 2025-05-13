@@ -1,24 +1,31 @@
+# githubで公開するのですべて環境変数にしていますが、もちろん直接書いてもOK
+
 # すでに存在するSSHトンネルを使う
-#下記2行があるときはSSHトンネルを使う（DBhostをlocalhostとはしないこと）
-#DBhost: 127.0.0.1
-#DBport: 9999
+#下記2行があるときはSSHトンネルを使う（この場合DBhostをlocalhostとはしないこと）
+DBhost: ${DBHOST}
+DBport: ${DBPORT}
+
+# ----------------------------------------------------
 
 # SSH接続を使わない
 UseSSH: false
 
-# SSH接続を使う
+# SSH接続を使う場合
 # 下記の設定は、UseSSH: true のときに有効
 #UseSSH: true
 SSHhost: ${SSHHOST}
 SSHport: ${SSHPORT}
 SSHuser: ${SSHUSER}
+
+# 認証方法は公開鍵暗証を使うべき
 #SSHpswd: ${SSHPSWD}
 SSHprvkey: ${SSHKEY}
 
+# ----------------------------------------------------
 
 # データベース名
-#DBname:	${DBNAME}
+DBname:	${DBNAME}
 #
 # ログイン名とパスワード
-DBuser:	${DBUSER}
-DBpswd:	${DBPW}
+DBuser: ${DBUSER}
+DBpswd:	${DBPSWD}
