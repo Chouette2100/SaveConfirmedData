@@ -34,8 +34,8 @@ import (
 
 	// "github.com/dustin/go-humanize"
 
-	// "github.com/Chouette2100/exsrapi"
-	// "github.com/Chouette2100/srapi"
+	// "github.com/Chouette2100/exsrapi/v2"
+	// "github.com/Chouette2100/srapi/v2"
 	"github.com/Chouette2100/srdblib/v2"
 )
 
@@ -81,7 +81,8 @@ func InsertIntoOrUpdatePoints(
 			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
 			status = -1
 		}
-	} else if roomdata.Point != 0 {
+		// } else if roomdata.Point != 0 {
+	} else {
 		// ポイントデータが存在し、かつポイントが0でない場合（ポイントが0の場合は更新しないのは事故対策）
 		sqlstmt = "update points set point = ?, `rank`=?, gap=?, pstatus=?, ptime =?, qstatus=?, qtime=? where ts=? and eventid=? and user_id=?"
 		_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, roomdata.Point, rank, gap, pstatus, ptime, qstatus, qtime, timestamp, eventid, roomdata.RoomID)
@@ -94,50 +95,51 @@ func InsertIntoOrUpdatePoints(
 
 	//	===============================================
 	/*
-	nrow = 0
-	sqlstmt = "select count(*) from eventuser where eventid = ? and userno = ?"
-	srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, eventid, roominf.Room.RoomID).Scan(&nrow)
-	if srdblib.Dberr != nil {
-		log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
-		status = -1
-	}
-
-	if nrow != 0 {
-		sqlstmt = "update eventuser set point = ? where eventid = ? and userno = ?"
-		_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, roominf.Point, eventid, roominf.Room.RoomID)
-
+		nrow = 0
+		sqlstmt = "select count(*) from eventuser where eventid = ? and userno = ?"
+		srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, eventid, roominf.Room.RoomID).Scan(&nrow)
 		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() update eventuser err=[%s]\n", srdblib.Dberr.Error())
+			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
 			status = -1
 		}
 
-	} else {
-		sqlstmt = "insert into eventuser (eventid, userno, istarget, iscntrbpoints, graph, color, point) values (?,?,?,?,?,?,?)"
-		_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, eventid, roominf.Room.RoomID, "N", "N", "N", "white", roominf.Point)
+		if nrow != 0 {
+			sqlstmt = "update eventuser set point = ? where eventid = ? and userno = ?"
+			_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, roominf.Point, eventid, roominf.Room.RoomID)
+
+			if srdblib.Dberr != nil {
+				log.Printf("InsertIntoOrUpdatePoints() update eventuser err=[%s]\n", srdblib.Dberr.Error())
+				status = -1
+			}
+
+		} else {
+			sqlstmt = "insert into eventuser (eventid, userno, istarget, iscntrbpoints, graph, color, point) values (?,?,?,?,?,?,?)"
+			_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, eventid, roominf.Room.RoomID, "N", "N", "N", "white", roominf.Point)
+			if srdblib.Dberr != nil {
+				log.Printf("InsertIntoOrUpdatePoints() insert into eventuser err=[%s]\n", srdblib.Dberr.Error())
+				status = -1
+			}
+		}
+
+		nrow = 0
+		sqlstmt = "select count(*) from user where userno = ?"
+		srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, roominf.Room.RoomID).Scan(&nrow)
 		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() insert into eventuser err=[%s]\n", srdblib.Dberr.Error())
+			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
 			status = -1
 		}
-	}
 
-	nrow = 0
-	sqlstmt = "select count(*) from user where userno = ?"
-	srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, roominf.Room.RoomID).Scan(&nrow)
-	if srdblib.Dberr != nil {
-		log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
-		status = -1
-	}
+		log.Printf("%s userno=%d nrow=%d\n", eventid, roominf.Room.RoomID, nrow)
 
-	log.Printf("%s userno=%d nrow=%d\n", eventid, roominf.Room.RoomID, nrow)
-
-	if nrow == 0 {
-		log.Printf(" roominf=%v\n", roominf)
-		// InsertIntoUser(timestamp, eventid, roominf)
-	}
+		if nrow == 0 {
+			log.Printf(" roominf=%v\n", roominf)
+			// InsertIntoUser(timestamp, eventid, roominf)
+		}
 	*/
 
 	return
 }
+
 /*
 func InsertIntoUser(tnow time.Time,
 	eventid string,
@@ -209,7 +211,7 @@ func InsertIntoUser(tnow time.Time,
 	return
 
 }
-	*/
+*/
 
 /*
 func GetRoomInfoByAPI(room_id string) (
@@ -522,4 +524,4 @@ func SelectIstargetAndIiscntrbpoint(
 	return
 
 }
-	*/
+*/

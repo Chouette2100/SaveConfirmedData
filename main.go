@@ -20,8 +20,8 @@ import (
 	"github.com/go-gorp/gorp"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/Chouette2100/exsrapi"
-	"github.com/Chouette2100/srapi"
+	"github.com/Chouette2100/exsrapi/v2"
+	"github.com/Chouette2100/srapi/v2"
 	"github.com/Chouette2100/srdblib/v2"
 )
 
@@ -44,9 +44,10 @@ import (
 00AE00 srdblib V2.2.0 を採用する。
 00AF00 起動時オプションOnlyUinfを追加する、していされたときはユーザー情報の更新のみを行う。
 00AF01 起動時オプションをUinf, Sdat, Bothとする。
+00AG00 https://www.showroom-live.com/event/room_listの削除に対する対応を行う
 */
 
-const version = "00AF01"
+const version = "00AG00"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
@@ -199,7 +200,10 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		SetConfirmedToEvent(client, sdat, uinf, done)
+		err = SetConfirmedToEvent(client, sdat, uinf, done)
+		if err != nil {
+			log.Printf("SetConfirmedToEvent() failed: %v\n", err)
+		}
 	}()
 
 	// シグナル受信とプロセス完了の両方を待つ
