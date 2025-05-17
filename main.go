@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"io"
+
 	// "io/ioutil"
 	"log"
 	"os"
@@ -14,8 +15,9 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/sys/unix"
 	"syscall"
+
+	"golang.org/x/sys/unix"
 
 	"github.com/go-gorp/gorp"
 	"golang.org/x/crypto/ssh/terminal"
@@ -45,9 +47,11 @@ import (
 00AF00 起動時オプションOnlyUinfを追加する、していされたときはユーザー情報の更新のみを行う。
 00AF01 起動時オプションをUinf, Sdat, Bothとする。
 00AG00 https://www.showroom-live.com/event/room_listの削除に対する対応を行う
+00AG01 UpinsUserAndEventuser()をUpinsUser()とUpinsEventuser()に分けて必要なものだけを実行する。
+00AG02 uinf && !sdatのときはLminに1日分を追加する。point=0の結果は保存しない（事故防止）
 */
 
-const version = "00AG00"
+const version = "00AG02"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
@@ -172,6 +176,12 @@ func main() {
 		err = fmt.Errorf("exsrapi.Loadconfig(): %w", err)
 		log.Printf("%s\n", err.Error())
 		return
+	}
+
+	if uinf && !sdat {
+		// ユーザー情報の更新は獲得ポイント取得に先立って行われるのでLminに1日分プラスしておく
+		// （獲得ポイントデータの取得・更新を短時間で終えるため）
+		srdblib.Env.Lmin += 86400
 	}
 
 	log.Printf("sdat=%t ufinf=%t Env=%+v\n", sdat, uinf, srdblib.Env)

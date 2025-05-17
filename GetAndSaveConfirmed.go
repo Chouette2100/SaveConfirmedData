@@ -138,6 +138,10 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 		// InsertIntoOrUpdatePoints(svtime, roominf, i+1, 0, eventid, "Conf.", "", "", "")
 		if sdat {
 			InsertIntoOrUpdatePoints(svtime, roomdata, roomdata.Rank, 0, eventid, "Conf.", "", "", "")
+			eu := srdblib.Eventuser{}
+			err = UpinsEventuser(client, tnow, &eu, eventid, roomdata)
+			weu := srdblib.Weventuser{}
+			err = UpinsEventuser(client, tnow, &weu, eventid, roomdata)
 			isconfirm = true
 		}
 
@@ -145,15 +149,15 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 			// 獲得ポイントが確定する前に OnlyUinf で起動したときにユーザ情報を取得する
 			// 確定結果を取得するときはユーザー情報は更新済みのはず
 			eu := srdblib.Eventuser{}
-			err = UpinsUserAndEventuser(client, tnow, &eu, eventid, roomdata)
+			err = UpinsUser(client, tnow, &eu, eventid, roomdata)
 			if err != nil {
-				err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
+				err = fmt.Errorf("%s UpinsUser() err=[%w]", eventid, err)
 				return
 			}
 			weu := srdblib.Weventuser{}
-			err = UpinsUserAndEventuser(client, tnow, &weu, eventid, roomdata)
+			err = UpinsUser(client, tnow, &weu, eventid, roomdata)
 			if err != nil {
-				err = fmt.Errorf("%s UpinsUserAndEventuser() err=[%w]", eventid, err)
+				err = fmt.Errorf("%s UpinsUser() err=[%w]", eventid, err)
 				return
 			}
 		}
@@ -205,6 +209,8 @@ func GetAndSaveConfirmed(client *http.Client, event *srdblib.Event, is_block boo
 
 }
 
+/*
+// EventuserテーブルとUserテーブルを更新する。
 func UpinsUserAndEventuser[T srdblib.EventuserR](
 	client *http.Client,
 	tnow time.Time,
@@ -227,6 +233,71 @@ func UpinsUserAndEventuser[T srdblib.EventuserR](
 		srdblib.UpinsUser(client, tnow, &xuser)
 	default:
 		err = fmt.Errorf("UpinstUserAndEventuser() invalid type of xeu")
+		return
+	}
+
+	eu := srdblib.Eventuser{
+		EventuserBR: srdblib.EventuserBR{
+			Eventid: eventid,
+			Userno:  roomdata.RoomID, // roomdata.Userno,
+			Vld:     roomdata.Rank,
+			Point:   roomdata.Point,
+		},
+	}
+	xeu.Set(&eu)
+	err = srdblib.UpinsEventuserG(xeu, tnow)
+	if err != nil {
+		err = fmt.Errorf("UpinsEventuserG() err=[%w]", err)
+		return
+	}
+
+	return
+
+}
+*/
+
+// Userテーブルを更新する。存在しなかったデータを追加し、古くなったデータを削除する。
+func UpinsUser[T srdblib.EventuserR](
+	client *http.Client,
+	tnow time.Time,
+	xeu T,
+	eventid string,
+	roomdata Roomdata,
+) (
+	err error,
+) {
+	switch any(xeu).(type) {
+	case *srdblib.Eventuser:
+		xuser := srdblib.User{
+			Userno: roomdata.RoomID,
+		}
+		srdblib.UpinsUser(client, tnow, &xuser)
+	case *srdblib.Weventuser:
+		xuser := srdblib.Wuser{
+			Userno: roomdata.RoomID,
+		}
+		srdblib.UpinsUser(client, tnow, &xuser)
+	default:
+		err = fmt.Errorf("UpinstUserAndEventuser() invalid type of xeu")
+	}
+
+	return
+
+}
+
+// Eventuserテーブルを更新する。獲得ポイントが0のときは更新しない（事故防止）
+func UpinsEventuser[T srdblib.EventuserR](
+	client *http.Client,
+	tnow time.Time,
+	xeu T,
+	eventid string,
+	roomdata Roomdata,
+) (
+	err error,
+) {
+
+	if roomdata.Point == 0 {
+		log.Printf(" UpinsEventuser() roomdata.Point == 0, eventid=%s, roomid=%d\n", eventid, roomdata.RoomID)
 		return
 	}
 

@@ -81,8 +81,7 @@ func InsertIntoOrUpdatePoints(
 			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
 			status = -1
 		}
-		// } else if roomdata.Point != 0 {
-	} else {
+	} else if roomdata.Point != 0 {
 		// ポイントデータが存在し、かつポイントが0でない場合（ポイントが0の場合は更新しないのは事故対策）
 		sqlstmt = "update points set point = ?, `rank`=?, gap=?, pstatus=?, ptime =?, qstatus=?, qtime=? where ts=? and eventid=? and user_id=?"
 		_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, roomdata.Point, rank, gap, pstatus, ptime, qstatus, qtime, timestamp, eventid, roomdata.RoomID)
