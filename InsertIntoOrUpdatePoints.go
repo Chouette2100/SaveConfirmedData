@@ -56,38 +56,39 @@ func InsertIntoOrUpdatePoints(
 ) {
 
 	status = 0
+	var err error
 
 	nrow := 0
 	sqlstmt := "select count(*) from points where ts = ? and eventid = ? and user_id= ?"
-	srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, timestamp, eventid, roomdata.RoomID).Scan(&nrow)
-	if srdblib.Dberr != nil {
-		log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
+	err = srdblib.Db.QueryRow(sqlstmt, timestamp, eventid, roomdata.RoomID).Scan(&nrow)
+	if err != nil {
+		log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", err.Error())
 		status = -1
 	}
 	if nrow == 0 {
 		//	log.Printf("InsertIntoOrUpdatePoints()　db.Prepare()\n")
 		var stmt *sql.Stmt
-		stmt, srdblib.Dberr = srdblib.Db.Prepare("INSERT INTO points(ts, user_id, eventid, point, `rank`, gap, pstatus, ptime, qstatus, qtime) VALUES(?,?,?,?,?,?,?,?,?,?)")
-		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
+		stmt, err = srdblib.Db.Prepare("INSERT INTO points(ts, user_id, eventid, point, `rank`, gap, pstatus, ptime, qstatus, qtime) VALUES(?,?,?,?,?,?,?,?,?,?)")
+		if err != nil {
+			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", err.Error())
 			status = -1
 		}
 		defer stmt.Close()
 
 		//	log.Printf("InsertIntoOrUpdatePoints()　row.Exec("InsertIntoOrUpdate",...)\n")
-		_, srdblib.Dberr = stmt.Exec(timestamp, roomdata.RoomID, eventid, roomdata.Point, rank, gap, pstatus, ptime, qstatus, qtime)
+		_, err = stmt.Exec(timestamp, roomdata.RoomID, eventid, roomdata.Point, rank, gap, pstatus, ptime, qstatus, qtime)
 
-		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
+		if err != nil {
+			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", err.Error())
 			status = -1
 		}
 	} else if roomdata.Point != 0 {
 		// ポイントデータが存在し、かつポイントが0でない場合（ポイントが0の場合は更新しないのは事故対策）
 		sqlstmt = "update points set point = ?, `rank`=?, gap=?, pstatus=?, ptime =?, qstatus=?, qtime=? where ts=? and eventid=? and user_id=?"
-		_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, roomdata.Point, rank, gap, pstatus, ptime, qstatus, qtime, timestamp, eventid, roomdata.RoomID)
+		_, err = srdblib.Db.Exec(sqlstmt, roomdata.Point, rank, gap, pstatus, ptime, qstatus, qtime, timestamp, eventid, roomdata.RoomID)
 
-		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() update points err=[%s]\n", srdblib.Dberr.Error())
+		if err != nil {
+			log.Printf("InsertIntoOrUpdatePoints() update points err=[%s]\n", err.Error())
 			status = -1
 		}
 	}
@@ -96,35 +97,35 @@ func InsertIntoOrUpdatePoints(
 	/*
 		nrow = 0
 		sqlstmt = "select count(*) from eventuser where eventid = ? and userno = ?"
-		srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, eventid, roominf.Room.RoomID).Scan(&nrow)
-		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
+		err = srdblib.Db.QueryRow(sqlstmt, eventid, roominf.Room.RoomID).Scan(&nrow)
+		if err != nil {
+			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", err.Error())
 			status = -1
 		}
 
 		if nrow != 0 {
 			sqlstmt = "update eventuser set point = ? where eventid = ? and userno = ?"
-			_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, roominf.Point, eventid, roominf.Room.RoomID)
+			_, err = srdblib.Db.Exec(sqlstmt, roominf.Point, eventid, roominf.Room.RoomID)
 
-			if srdblib.Dberr != nil {
-				log.Printf("InsertIntoOrUpdatePoints() update eventuser err=[%s]\n", srdblib.Dberr.Error())
+			if err != nil {
+				log.Printf("InsertIntoOrUpdatePoints() update eventuser err=[%s]\n", err.Error())
 				status = -1
 			}
 
 		} else {
 			sqlstmt = "insert into eventuser (eventid, userno, istarget, iscntrbpoints, graph, color, point) values (?,?,?,?,?,?,?)"
-			_, srdblib.Dberr = srdblib.Db.Exec(sqlstmt, eventid, roominf.Room.RoomID, "N", "N", "N", "white", roominf.Point)
-			if srdblib.Dberr != nil {
-				log.Printf("InsertIntoOrUpdatePoints() insert into eventuser err=[%s]\n", srdblib.Dberr.Error())
+			_, err = srdblib.Db.Exec(sqlstmt, eventid, roominf.Room.RoomID, "N", "N", "N", "white", roominf.Point)
+			if err != nil {
+				log.Printf("InsertIntoOrUpdatePoints() insert into eventuser err=[%s]\n", err.Error())
 				status = -1
 			}
 		}
 
 		nrow = 0
 		sqlstmt = "select count(*) from user where userno = ?"
-		srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, roominf.Room.RoomID).Scan(&nrow)
-		if srdblib.Dberr != nil {
-			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", srdblib.Dberr.Error())
+		err = srdblib.Db.QueryRow(sqlstmt, roominf.Room.RoomID).Scan(&nrow)
+		if err != nil {
+			log.Printf("InsertIntoOrUpdatePoints() select err=[%s]\n", err.Error())
 			status = -1
 		}
 
@@ -334,13 +335,15 @@ func GetAciveFanByAPI(room_id string, yyyymm string) (nofan int) {
 
 func DeleteFromPoints(tx *sql.Tx, eventid string, ts time.Time, user_id int) {
 
+	var err error
+
 	sql := "delete from points where eventid = ? and ts= ? and user_id = ?"
 
 	//	log.Printf("Db.Exec(\"delete ...\")\n")
-	_, srdblib.Dberr = tx.Exec(sql, eventid, ts, user_id)
+	_, err = tx.Exec(sql, eventid, ts, user_id)
 
-	if srdblib.Dberr != nil {
-		log.Printf("DeleteFromPoints() select err=[%s]\n", srdblib.Dberr.Error())
+	if err != nil {
+		log.Printf("DeleteFromPoints() select err=[%s]\n", err.Error())
 		//	status = -1
 	}
 
@@ -357,6 +360,8 @@ func InsertIntoTimeTable(
 	status int,
 ) {
 
+	var err error
+
 	status = 0
 
 	log.Printf("InsertIntoTimeTable() called. eventid=%s, userno =%d st1=%v\n", eventid, userno, st1)
@@ -364,17 +369,17 @@ func InsertIntoTimeTable(
 	var stmt *sql.Stmt
 	sql := "INSERT INTO timetable(eventid, userid, sampletm1, stime, etime, target, earnedpoint, status)"
 	sql += " VALUES(?,?,?,?,?,?,?,?)"
-	stmt, srdblib.Dberr = srdblib.Db.Prepare(sql)
-	if srdblib.Dberr != nil {
-		log.Printf("InsertIntoPoints() prepare() err=[%s]\n", srdblib.Dberr.Error())
+	stmt, err = srdblib.Db.Prepare(sql)
+	if err != nil {
+		log.Printf("InsertIntoPoints() prepare() err=[%s]\n", err.Error())
 		status = -1
 	}
 	defer stmt.Close()
 
-	_, srdblib.Dberr = stmt.Exec(eventid, userno, st1, stime, etime, -1, earnedp, 0)
+	_, err = stmt.Exec(eventid, userno, st1, stime, etime, -1, earnedp, 0)
 
-	if srdblib.Dberr != nil {
-		log.Printf("InsertIntoEventrank() exec() err=[%s]\n", srdblib.Dberr.Error())
+	if err != nil {
+		log.Printf("InsertIntoEventrank() exec() err=[%s]\n", err.Error())
 		status = -1
 	}
 
@@ -512,9 +517,9 @@ func SelectIstargetAndIiscntrbpoint(
 ) {
 
 	sqlstmt := "select istarget, iscntrbpoints from eventuser where eventid = ? and userno =?"
-	srdblib.Dberr = srdblib.Db.QueryRow(sqlstmt, eventid, userno).Scan(&istarget, &iscntrbpoint)
-	if srdblib.Dberr != nil {
-		log.Printf("SelectIstargetAndIiscntrbpoint() Prepare() err=%s\n", srdblib.Dberr.Error())
+	err = srdblib.Db.QueryRow(sqlstmt, eventid, userno).Scan(&istarget, &iscntrbpoint)
+	if err != nil {
+		log.Printf("SelectIstargetAndIiscntrbpoint() Prepare() err=%s\n", err.Error())
 		istarget = "N"
 		iscntrbpoint = "N"
 		status = -5

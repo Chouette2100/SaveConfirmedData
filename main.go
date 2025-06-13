@@ -49,9 +49,10 @@ import (
 00AG00 https://www.showroom-live.com/event/room_listの削除に対する対応を行う
 00AG01 UpinsUserAndEventuser()をUpinsUser()とUpinsEventuser()に分けて必要なものだけを実行する。
 00AG02 uinf && !sdatのときはLminに1日分を追加する。point=0の結果は保存しない（事故防止）
+00AG03 srdblib.Dberrをerrに変更する。
 */
 
-const version = "00AG02"
+const version = "00AG03"
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
