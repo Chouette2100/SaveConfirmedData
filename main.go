@@ -51,6 +51,7 @@ import (
 00AG02 uinf && !sdatのときはLminに1日分を追加する。point=0の結果は保存しない（事故防止）
 00AG03 srdblib.Dberrをerrに変更する。
 200100 select * を使わず、カラムを指定する。
+200101 カラムリストの指定で不要になった古いソースを削除する。
 */
 
 const version = "200100"

@@ -32,6 +32,7 @@ func ExtractEvents(
 	err error,
 ) {
 
+	// sqlst = "SELECT " + clmlist["event"] + " FROM event WHERE "
 	sqlst := ""
 	if cl, ok := clmlist["event"]; !ok {
 		err = fmt.Errorf("clmlist['event'] is empty")
@@ -40,7 +41,6 @@ func ExtractEvents(
 		// カラムが存在する場合の処理
 		sqlst = "SELECT " + cl + " FROM event WHERE "
 	}
-	sqlst = "SELECT " + clmlist["event"] + " FROM event WHERE "
 	sqlst += " rstatus != 'Confirmed' "
 	if !condition.LowerLimitOfEndtime.IsZero() {
 		sqlst += " AND endtime >= ? "
