@@ -50,9 +50,16 @@ import (
 00AG01 UpinsUserAndEventuser()をUpinsUser()とUpinsEventuser()に分けて必要なものだけを実行する。
 00AG02 uinf && !sdatのときはLminに1日分を追加する。point=0の結果は保存しない（事故防止）
 00AG03 srdblib.Dberrをerrに変更する。
+200100 select * を使わず、カラムを指定する。
 */
 
-const version = "00AG03"
+const version = "200100"
+
+var clmlist map[string]string = map[string]string{}
+
+func init() {
+	clmlist["event"] = srdblib.ExtractStructColumns("event")
+}
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
 // イベント終了の翌日12時〜翌々日12時にクローンなどで実行する。
