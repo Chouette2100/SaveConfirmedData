@@ -52,14 +52,16 @@ import (
 00AG03 srdblib.Dberrをerrに変更する。
 200100 select * を使わず、カラムを指定する。
 200101 カラムリストの指定で不要になった古いソースを削除する。
+200102 go.modを作り直す
+200103 go.srdblib.ExtractStructColumns()の引数を&srdblib.Event{}に変更する。
 */
 
-const version = "200100"
+const version = "200103"
 
 var clmlist map[string]string = map[string]string{}
 
 func init() {
-	clmlist["event"] = srdblib.ExtractStructColumns("event")
+	clmlist["event"] = srdblib.ExtractStructColumns(&srdblib.Event{})
 }
 
 // イベントの最終結果（獲得ポイント）を取得して、ポイントテーブルとイベントユーザーテーブルに格納する。
